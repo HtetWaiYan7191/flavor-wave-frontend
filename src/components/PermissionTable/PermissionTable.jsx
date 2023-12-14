@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Table,
   TableBody,
@@ -28,8 +28,14 @@ import NoData from "../NoData/NoData";
 import { updateStatus } from "../../redux/preOrderSlice";
 import { updatePreOrder } from "../../redux/preOrderSlice";
 import clsx from "clsx";
+import { ConfirmAlert } from "../moodles/confirmMoodle";
 const PermissionTable = ({ dashboard }) => {
   const [status, setStatus] = useState("pending");
+  ///for alert
+  const [alertData, setAlertData] = useState({});
+  const [dataToSubmit, setDataToSubmit] = useState({ id: 0, grant: false });
+  const alert_ref = useRef(0);
+  //alert end
   const dispatch = useDispatch();
   const unPermitOrders = useSelector((state) => state.preorder.unPermitOrders);
   // const preOrders = useSelector((state) => state.preorder.preOrders);
@@ -52,6 +58,15 @@ const PermissionTable = ({ dashboard }) => {
   useEffect(() => {
     dispatch(fetchPreOrders());
   }, []);
+  //for alert
+  useEffect(() => {
+    if (alertData) {
+      handleClick(alertData.id, alertData.grant);
+    }
+  }, [alertData]);
+  //alert end
+  console.log(urgentOrders, "urgentsss");
+  console.log(dataToSubmit, "tosubmit");
 
   return (
     <Table>
@@ -126,9 +141,13 @@ const PermissionTable = ({ dashboard }) => {
                 <TableCell className="flex justify-center gap-4 flex-row-reverse">
                   <Button
                     className={`text-[18px]`}
-                    onClick={() =>
-                      handleClick(urgentOrder.id, urgentOrder.permission)
-                    }
+                    onClick={() => {
+                      setDataToSubmit({
+                        id: unPermitOrders.id,
+                        grant: unPermitOrders.permission,
+                      });
+                      alert_ref.current.click();
+                    }}
                     // disabled={!urgentOrder.permission}
                   >
                     {!urgentOrder.permission ? "Granted" : "Need Permission"}
@@ -183,9 +202,13 @@ const PermissionTable = ({ dashboard }) => {
               <TableCell className="flex justify-center gap-4 flex-row-reverse">
                 <Button
                   className={`text-[18px]`}
-                  onClick={() =>
-                    handleClick(unPermitOrder.id, unPermitOrder.permission)
-                  }
+                  onClick={() => {
+                    setDataToSubmit({
+                      id: unPermitOrder.id,
+                      grant: unPermitOrder.permission,
+                    });
+                    alert_ref.current.click();
+                  }}
                   disabled={!unPermitOrder.permission}
                 >
                   {!unPermitOrder.permission ? "Granted" : "Need Permission"}
@@ -197,6 +220,14 @@ const PermissionTable = ({ dashboard }) => {
           <NoData />
         )}
       </TableBody>
+      <ConfirmAlert
+        data={dataToSubmit}
+        onSubmit={setAlertData}
+        dialogText={` are u sure to give permission to ${
+          dataToSubmit.grant ? "need permision" : "granted"
+        }`}
+        alertRef={alert_ref}
+      />
     </Table>
   );
 };

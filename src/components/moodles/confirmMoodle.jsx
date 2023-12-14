@@ -1,23 +1,37 @@
-import { Button } from "../ui/button";
-import Moodle from "./moodleComponent";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
-export default function ConfirmMoodle({
-  hide,
-  onSubmit,
-  confirmText,
-  submitText,
-  moodleButtonName,
-}) {
+export function ConfirmAlert({ data, onSubmit, dialogText, alertRef }) {
   return (
-    <>
-      <Moodle buttonName={moodleButtonName}>
-        <section className=" relative p-2 flex justify-center min-w-[40vw] min-h-[35vh] items-center">
-          <h3>{confirmText}</h3>
-          <Button className="absolute bottom-1 right-0" onClick={onSubmit}>
-            {submitText}
-          </Button>
-        </section>
-      </Moodle>
-    </>
+    <AlertDialog>
+      <AlertDialogTrigger asChild ref={alertRef}>
+        <button className=" hidden "></button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>{dialogText}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() =>
+              onSubmit({ orderId: data.orderId, value: data.value })
+            }
+          >
+            Continue
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Table,
   TableBody,
@@ -28,7 +28,7 @@ import {
 import { updateStatus } from "../../redux/preOrderSlice";
 import NoData from "../NoData/NoData";
 import LoadingComp from "../loading/Loading";
-import ConfirmMoodle from "../moodles/confirmMoodle";
+import { ConfirmAlert } from "../moodles/confirmMoodle";
 
 export function PreorderTable() {
   // const [status, setStatus] = React.useState("pending");
@@ -36,7 +36,11 @@ export function PreorderTable() {
 
   const preOrders = useSelector((state) => state.preorder.preOrders);
   const preOrderItems = useSelector((state) => state.preorder.preOrderItems);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertData, setAlertData] = useState({ orderId: 0, value: "" });
+  const [dataToSubmit, setDataToSubmit] = useState({ orderId: 0, value: "" });
   const isLoading = useSelector((state) => state.preorder);
+  const alert_ref = useRef(0);
   const filterOrderStatus = useSelector(
     (state) => state.preorder.filterOrderStatus
   );
@@ -53,14 +57,27 @@ export function PreorderTable() {
     dispatch(fetchPreOrders());
   }, [dispatch]);
 
-  const updateOrderStatus = (id, value) => {
+  // const handleAlertData = (id, value) => {
+  //   setAlertData({ orderId: id, value: value });
+  // };
+  const handleUpdateStatus = (id, value) => {
     dispatch(updateStatus({ id, value }));
     dispatch(updatePreOrder({ id, value }));
   };
+
+  useEffect(() => {
+    if (alertData.value !== "") {
+      handleUpdateStatus(alertData.orderId, alertData.value);
+    }
+  }, [alertData]);
+
   console.log("selected:", selectedPreOrder);
+  const handleAlert = () => {
+    return alert_ref.current.click();
+  };
+  console.log(alertData, "isalerdta");
   return (
     <>
-      {console.log(isLoading.isLoading)}
       {!isLoading.isLoading ? (
         filterOrderStatus.length > 0 ? (
           <Table className="border-b-2 border-primarycolor w-full">
@@ -116,9 +133,15 @@ export function PreorderTable() {
                         <DropdownMenuLabel>Order Status</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup
-                          onValueChange={(e) =>
-                            updateOrderStatus(preOrder.id, e)
-                          }
+                          onValueChange={(status) => {
+                            //updateOrderStatus(preOrder.id, e)
+                            setShowAlert(true);
+                            setDataToSubmit({
+                              orderId: preOrder.id,
+                              value: status,
+                            });
+                            handleAlert();
+                          }}
                         >
                           <DropdownMenuRadioItem value="pending">
                             Pending
@@ -146,9 +169,11 @@ export function PreorderTable() {
       {showDetail ? (
         <SaleMoodle hide={() => setShowDetail(false)} data={selectedPreOrder} />
       ) : null}
-      <ConfirmMoodle
-        confirmText={"confirm to submit"}
-        onSubmit={() => console.log("work here")}
+      <ConfirmAlert
+        data={dataToSubmit}
+        onSubmit={setAlertData}
+        dialogText={`Are you sure to change status to ${dataToSubmit.value}`}
+        alertRef={alert_ref}
       />
     </>
   );
