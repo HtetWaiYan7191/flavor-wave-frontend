@@ -28,6 +28,7 @@ import {
 import { updateStatus } from "../../redux/preOrderSlice";
 import NoData from "../NoData/NoData";
 import LoadingComp from "../loading/Loading";
+import ConfirmMoodle from "../moodles/confirmMoodle";
 
 export function PreorderTable() {
   // const [status, setStatus] = React.useState("pending");
@@ -145,6 +146,10 @@ export function PreorderTable() {
       {showDetail ? (
         <SaleMoodle hide={() => setShowDetail(false)} data={selectedPreOrder} />
       ) : null}
+      <ConfirmMoodle
+        confirmText={"confirm to submit"}
+        onSubmit={() => console.log("work here")}
+      />
     </>
   );
 }
